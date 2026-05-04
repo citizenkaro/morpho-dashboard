@@ -1,5 +1,5 @@
 import fs from "fs";
-import type { BalanceSnapshot, AgentEvent, VaultRate, PositionData, PerformanceData } from "./types";
+import type { BalanceSnapshot, AgentEvent, VaultRate, VaultRatesHistoryPoint, PositionData, PerformanceData } from "./types";
 
 const LOG_DIR = process.env.LOG_DIR || "./logs";
 const IS_VERCEL = process.env.VERCEL === "1";
@@ -86,6 +86,23 @@ export function getVaultRates(agentId: string): VaultRate[] {
     }
   }
   return [];
+}
+
+export function getVaultRatesHistory(agentId: string): { points: VaultRatesHistoryPoint[]; vaultNames: string[] } {
+  const entries = parseLogFile(agentId);
+  const ratesEntries = entries.filter((e) => e.message === "rates_check" && Array.isArray(e.vaults));
+
+  const namesSeen = new Set<string>();
+  const points: VaultRatesHistoryPoint[] = ratesEntries.map((e) => {
+    const point: VaultRatesHistoryPoint = { ts: e.ts };
+    for (const v of e.vaults as VaultRate[]) {
+      namesSeen.add(v.name);
+      point[v.name] = Number(v.netApy.toFixed(3));
+    }
+    return point;
+  });
+
+  return { points, vaultNames: Array.from(namesSeen) };
 }
 
 export function getPositionData(agentId: string): PositionData | null {

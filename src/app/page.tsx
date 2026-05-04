@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { agents } from "@/lib/mock-data";
-import type { Agent, BalanceSnapshot, AgentEvent, VaultRate, PositionData, PerformanceData } from "@/lib/types";
+import type { Agent, BalanceSnapshot, AgentEvent, VaultRate, VaultRatesHistoryPoint, PositionData, PerformanceData } from "@/lib/types";
 import { BalanceChart } from "@/components/BalanceChart";
 import { EventList } from "@/components/EventList";
 import { AgentConfig } from "@/components/AgentConfig";
@@ -12,12 +12,14 @@ import { AgentExplainer } from "@/components/AgentExplainer";
 import { CurrentPositionCard } from "@/components/CurrentPositionCard";
 import { PerformanceCard } from "@/components/PerformanceCard";
 import { VaultRatesTable } from "@/components/VaultRatesTable";
+import { VaultRatesHistory } from "@/components/VaultRatesHistory";
 
 interface DashboardData {
   agent: Agent;
   balanceHistory: BalanceSnapshot[];
   events: AgentEvent[];
   rates: VaultRate[];
+  ratesHistory: { points: VaultRatesHistoryPoint[]; vaultNames: string[] };
   position: PositionData | null;
   performance: PerformanceData | null;
 }
@@ -44,6 +46,7 @@ export default function Dashboard() {
         balanceHistory: generateBalanceHistory(),
         events: generateEvents(),
         rates: generateVaultRates(),
+        ratesHistory: { points: [], vaultNames: [] },
         position: generatePosition(),
         performance: generatePerformance(),
       });
@@ -62,7 +65,7 @@ export default function Dashboard() {
     );
   }
 
-  const { agent, balanceHistory, events, rates, position, performance } = data;
+  const { agent, balanceHistory, events, rates, ratesHistory, position, performance } = data;
   const lastSnapshot = balanceHistory.length > 0 ? balanceHistory[balanceHistory.length - 1] : null;
   const positionValueUsd = position?.underlyingValueUsd ?? lastSnapshot?.balance ?? 0;
   const txCount = events.filter((e) => e.txHash).length;
@@ -157,6 +160,15 @@ export default function Dashboard() {
       )}
 
       {/* 4. Vault rates landscape */}
+      {ratesHistory.points.length > 0 && (
+        <div style={{ marginBottom: "var(--space-4xl)" }}>
+          <VaultRatesHistory
+            data={ratesHistory.points}
+            vaultNames={ratesHistory.vaultNames}
+            currentVaultName={position?.vaultName ?? null}
+          />
+        </div>
+      )}
       {rates.length > 0 && (
         <div style={{ marginBottom: "var(--space-4xl)" }}>
           <VaultRatesTable rates={rates} />

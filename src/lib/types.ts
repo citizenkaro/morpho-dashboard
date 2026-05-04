@@ -46,6 +46,11 @@ export interface PositionData {
   rebalanceCount: number;
 }
 
+export interface VaultRatesHistoryPoint {
+  ts: string;
+  [vaultName: string]: string | number;
+}
+
 export interface PerformanceData {
   initialBalance: number;
   currentBalance: number;

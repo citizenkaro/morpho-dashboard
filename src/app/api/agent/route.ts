@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getBalanceHistory, getAgentEvents, getAgentStatus, getVaultRates, getPositionData, getPerformanceData } from "@/lib/read-logs";
+import { getBalanceHistory, getAgentEvents, getAgentStatus, getVaultRates, getVaultRatesHistory, getPositionData, getPerformanceData } from "@/lib/read-logs";
 import { agents } from "@/lib/mock-data";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +17,7 @@ export async function GET(request: Request) {
   const events = getAgentEvents(agentId);
   const liveStatus = getAgentStatus(agentId);
   const rates = getVaultRates(agentId);
+  const ratesHistory = getVaultRatesHistory(agentId);
   const position = getPositionData(agentId);
   const performance = getPerformanceData(agentId);
 
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
     balanceHistory,
     events,
     rates,
+    ratesHistory,
     position,
     performance,
   });
